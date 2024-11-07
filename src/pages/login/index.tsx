@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import Image from 'next/image';
-import logoImg from '../../../public/images/veterinarioPRO.png'
+import logoImg from '../../../public/images/logo.svg'
 import { Flex, Text, Center, Input, Button } from '@chakra-ui/react'
 
 import Link from 'next/link'
