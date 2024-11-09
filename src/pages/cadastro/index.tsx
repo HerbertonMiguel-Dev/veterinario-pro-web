@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import Head from 'next/head'
 import Image from 'next/image';
 import logoImg from '../../../public/images/logo.svg'
@@ -6,15 +6,25 @@ import { Flex, Text, Center, Input, Button } from '@chakra-ui/react'
 
 import Link from 'next/link'
 
+import { AuthContext } from '../../context/AuthContext'
+
 export default function Cadastro() {
+  const { signUp } = useContext(AuthContext);
+
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
 
-  function processarCadasro() {
-    console.log(nome)
-    console.log(email)
-    console.log(senha)
+  async function processarCadasro() {
+    if(nome === '' && email === '' && senha === ''){
+      return;
+    }
+
+    await signUp({
+      nome,
+      email,
+      senha
+    })
   }
 
   return (
