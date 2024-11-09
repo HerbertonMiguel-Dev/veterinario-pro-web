@@ -8,6 +8,8 @@ import Link from 'next/link'
 
 import { AuthContext } from '../../context/AuthContext'
 
+import { canSSRGuest } from '../../utils/canSSRGuest'
+
 export default function Login(){
   const { signIn } = useContext(AuthContext)
 
@@ -16,6 +18,10 @@ export default function Login(){
 
 
   async function processarLogin(){
+    if(email === '' || senha === ''){
+      return;
+    }
+
     await signIn({
       email,
       senha,
@@ -87,3 +93,9 @@ export default function Login(){
     </>
   )
 }
+
+export const getServerSideProps = canSSRGuest(async (ctx) => {
+  return{
+    props: {}
+  }
+})
