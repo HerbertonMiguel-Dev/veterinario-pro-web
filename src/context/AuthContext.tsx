@@ -1,5 +1,5 @@
-import { createContext, ReactNode, useState } from 'react'
-import { destroyCookie, setCookie } from 'nookies'
+import { createContext, ReactNode, useState, useEffect } from 'react'
+import { destroyCookie, setCookie, parseCookies } from 'nookies'
 import Router from 'next/router'
 
 import { api } from '../services/apiClient'
@@ -56,6 +56,29 @@ export function signOut(){
 export function AuthProvider({ children }: AuthProviderProps){
   const [usuario, setUsuario] = useState<UsuarioProps>()
   const estaAutenticado = !!usuario;
+
+  useEffect(() => {
+    const { '@veterinario.token': token } = parseCookies();
+
+    if(token){
+      api.get('/me').then(resposta => {
+        const { id, nome, endereco, email, assinaturas } = resposta.data;
+        setUsuario({
+          id,
+          nome,
+          email,
+          endereco,
+          assinaturas
+        })
+
+      })
+      .catch(()=> {
+        signOut()
+      })
+
+    }
+
+  }, [])
 
   async function signIn({ email, senha }: SignInProps){
     try{
