@@ -8,6 +8,8 @@ interface AuthContextData {
   usuario: UsuarioProps;
   estaAutenticado: boolean;
   signIn: (credenciais: SignInProps) => Promise<void>;
+  signUp: (credenciais: SignUpProps) => Promise<void>;
+  logoutUser: () => Promise<void>;
 }
 
 interface UsuarioProps {
@@ -32,6 +34,12 @@ interface SignInProps {
   senha: string;
 }
 
+interface SignUpProps{
+  nome: string;
+  email: string;
+  senha: string;
+}
+
 export const AuthContext = createContext({} as AuthContextData)
 
 export function signOut(){
@@ -51,12 +59,12 @@ export function AuthProvider({ children }: AuthProviderProps){
 
   async function signIn({ email, senha }: SignInProps){
     try{
-      const response = await api.post("/sessao", {
+      const resposta = await api.post("/sessao", {
         email,
         senha,
       })
 
-      const { id, nome, token, assinaturas, endereco} = response.data;
+      const { id, nome, token, assinaturas, endereco} = resposta.data;
 
       setCookie(undefined, '@veterinario.token', token, {
         maxAge: 60 * 60 * 24 * 30, // Expirar em 1 mês
@@ -82,9 +90,34 @@ export function AuthProvider({ children }: AuthProviderProps){
     }
   }
 
+  async function signUp({ nome, email, senha}: SignUpProps){
+    try{
+      const resposta = await api.post('/usuarios', {
+        nome,
+        email,
+        senha
+      })
+
+      Router.push('/login')
+
+    }catch(err){
+      console.log(err);
+    }
+  }
+
+  async function logoutUser(){
+    try{
+      destroyCookie(null, '@veterinario.token', { path: '/' })
+      Router.push('/login')
+      setUsuario(null);
+    }catch(err){
+      console.log("ERRO AO SAIR", err)
+    }
+  }
+
 
   return(
-    <AuthContext.Provider value={{ usuario, estaAutenticado, signIn }}>
+    <AuthContext.Provider value={{ usuario, estaAutenticado, signIn, signUp, logoutUser }}>
       {children}
     </AuthContext.Provider>
   )
