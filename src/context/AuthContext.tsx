@@ -1,6 +1,8 @@
 import { createContext, ReactNode, useState } from 'react'
-import { destroyCookie } from 'nookies'
+import { destroyCookie, setCookie } from 'nookies'
 import Router from 'next/router'
+
+import { api } from '../services/apiClient'
 
 interface AuthContextData {
   usuario: UsuarioProps;
@@ -48,12 +50,36 @@ export function AuthProvider({ children }: AuthProviderProps){
   const estaAutenticado = !!usuario;
 
   async function signIn({ email, senha }: SignInProps){
-    console.log("VAMOS FAZER SEU LOGIN")
-    
-    console.log({
-      email,
-      senha
-    })
+    try{
+      const response = await api.post("/sessao", {
+        email,
+        senha,
+      })
+
+      const { id, nome, token, assinaturas, endereco} = response.data;
+
+      setCookie(undefined, '@veterinario.token', token, {
+        maxAge: 60 * 60 * 24 * 30, // Expirar em 1 mês
+        path: '/'
+      })
+
+      setUsuario({
+        id,
+        nome,
+        email,
+        endereco,
+        assinaturas
+      })
+
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`
+
+      
+      Router.push('/dashboard')
+
+
+    }catch(err){
+      console.log("ERRO AO ENTRAR", err)
+    }
   }
 
 
